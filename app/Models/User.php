@@ -20,8 +20,14 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
         'email',
+        'mobile_number',
         'password',
+        'birth_date',
+        'gender',
+        'avatar',
     ];
 
     /**
@@ -45,5 +51,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relationship: User has many Consultations
+     */
+    public function consultations()
+    {
+        return $this->hasMany(Consultation::class);
     }
 }
