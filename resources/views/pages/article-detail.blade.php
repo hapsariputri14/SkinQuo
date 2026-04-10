@@ -1,113 +1,354 @@
 @extends('layouts.app')
 
-@section('title', $article->title . ' — SkinQuo')
+@section('title', ($article->title ?? 'Article') . ' — SkinQuo')
 
 @push('styles')
 <style>
-    .article-detail-wrapper {
+    /* ══════════════════════════════════
+       ARTICLE DETAIL PAGE
+    ══════════════════════════════════ */
+    .ad-page {
+        background: #FFEAC5;
+        min-height: 100vh;
+        padding-top: 6rem;
+        padding-bottom: 6rem;
+    }
+
+    /* ── Back nav ── */
+    .ad-back {
         max-width: 800px;
-        margin: 6rem auto 4rem;
+        margin: 0 auto 2rem;
         padding: 0 2rem;
     }
 
-    .article-detail-header {
-        margin-bottom: 2rem;
-    }
-
-    .article-detail-meta {
-        display: flex;
-        gap: 1.5rem;
+    .ad-back-link {
+        display: inline-flex;
         align-items: center;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: rgba(96, 63, 38, 0.6);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .ad-back-link:hover { color: #603F26; }
+    .ad-back-link svg { transition: transform 0.2s; }
+    .ad-back-link:hover svg { transform: translateX(-3px); }
+
+    /* ── Article wrapper ── */
+    .ad-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    /* ── Header ── */
+    .ad-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .ad-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
         flex-wrap: wrap;
-        margin-bottom: 1rem;
-        font-size: 0.9rem;
-        color: var(--brown);
+        margin-bottom: 1.25rem;
     }
 
-    .article-detail-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 2.5rem;
+    .ad-badge {
+        display: inline-block;
+        background: rgba(96, 63, 38, 0.1);
+        color: #6C4E31;
+        border-radius: 999px;
+        padding: 0.3rem 1rem;
+        font-size: 0.68rem;
         font-weight: 700;
-        color: var(--dark-brown);
-        line-height: 1.2;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
     }
 
-    .article-detail-thumbnail {
-        width: 100%;
-        height: 400px;
-        border-radius: 16px;
-        margin-bottom: 2rem;
-        object-fit: cover;
-        background: linear-gradient(135deg, #e8d5bb, #d4b896);
+    .ad-date {
+        font-size: 0.8rem;
+        color: rgba(96, 63, 38, 0.5);
+    }
+
+    .ad-title {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(1.9rem, 4.5vw, 2.9rem);
+        font-weight: 700;
+        color: #603F26;
+        line-height: 1.2;
+        margin-bottom: 1.25rem;
+    }
+
+    .ad-excerpt {
+        font-size: 1.05rem;
+        color: rgba(96, 63, 38, 0.65);
+        line-height: 1.75;
+        border-left: 3px solid #FFDBB5;
+        padding-left: 1.25rem;
+    }
+
+    /* ── Thumbnail ── */
+    .ad-thumb-wrap {
+        margin-bottom: 2.75rem;
+        border-radius: 20px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #d4b896, #b89070);
+        height: 420px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 5rem;
+        position: relative;
+    }
+    .ad-thumb-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        inset: 0;
     }
 
-    .article-detail-body {
-        font-size: 1.05rem;
-        line-height: 1.8;
-        color: var(--brown);
+    /* ── Body ── */
+    .ad-body {
+        font-size: 1.02rem;
+        line-height: 1.85;
+        color: rgba(96, 63, 38, 0.82);
+        margin-bottom: 3.5rem;
     }
 
-    .article-detail-body h2 {
+    .ad-body h2 {
         font-family: 'Playfair Display', serif;
-        font-size: 1.8rem;
+        font-size: 1.65rem;
         font-weight: 700;
-        color: var(--dark-brown);
+        color: #603F26;
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .ad-body h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #603F26;
         margin-top: 2rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
     }
 
-    .article-detail-body p {
-        margin-bottom: 1rem;
+    .ad-body p { margin-bottom: 1.25rem; }
+
+    .ad-body ul, .ad-body ol {
+        padding-left: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+    .ad-body li { margin-bottom: 0.5rem; }
+
+    .ad-body blockquote {
+        background: #FFDBB5;
+        border-left: 4px solid #603F26;
+        border-radius: 0 12px 12px 0;
+        padding: 1.25rem 1.5rem;
+        margin: 1.75rem 0;
+        font-family: 'Playfair Display', serif;
+        font-style: italic;
+        font-size: 1.1rem;
+        color: #603F26;
     }
 
-    .article-detail-body ul,
-    .article-detail-body ol {
-        margin-left: 1.5rem;
-        margin-bottom: 1rem;
+    .ad-body strong { color: #603F26; font-weight: 700; }
+
+    .ad-body img {
+        width: 100%;
+        border-radius: 12px;
+        margin: 1.5rem 0;
     }
 
-    .article-detail-body li {
-        margin-bottom: 0.5rem;
+    /* ── Divider ── */
+    .ad-divider {
+        border: none;
+        border-top: 1.5px solid rgba(108, 78, 49, 0.12);
+        margin: 3rem 0;
+    }
+
+    /* ── Recommended Articles ── */
+    .ad-recommended {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .ad-rec-header {
+        display: flex;
+        align-items: baseline;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .ad-rec-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #603F26;
+    }
+
+    .ad-rec-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 820px) { .ad-rec-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px) {
+        .ad-rec-grid { grid-template-columns: 1fr; }
+        .ad-thumb-wrap { height: 260px; }
+        .ad-back, .ad-wrapper { padding: 0 1.25rem; }
+    }
+
+    .ad-rec-card {
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        text-decoration: none;
+        border: 1.5px solid rgba(108, 78, 49, 0.08);
+        transition: transform 0.25s, box-shadow 0.25s;
+        display: flex;
+        flex-direction: column;
+    }
+    .ad-rec-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 32px rgba(96, 63, 38, 0.13);
+    }
+
+    .ad-rec-thumb {
+        height: 160px;
+        background: linear-gradient(135deg, #e8d5bb, #d4b896);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .ad-rec-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        inset: 0;
+        transition: transform 0.4s;
+    }
+    .ad-rec-card:hover .ad-rec-thumb img { transform: scale(1.06); }
+
+    .ad-rec-body {
+        padding: 1.2rem 1.3rem 1.4rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ad-rec-badge {
+        display: inline-block;
+        background: rgba(96, 63, 38, 0.07);
+        color: #6C4E31;
+        border-radius: 999px;
+        padding: 0.22rem 0.7rem;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        margin-bottom: 0.65rem;
+        width: fit-content;
+    }
+
+    .ad-rec-card-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #603F26;
+        line-height: 1.4;
+        flex: 1;
+    }
+
+    .ad-rec-date {
+        font-size: 0.7rem;
+        color: rgba(96, 63, 38, 0.4);
+        margin-top: 0.75rem;
     }
 </style>
 @endpush
 
 @section('content')
-<div class="article-detail-wrapper">
+<div class="ad-page">
 
-    {{-- Header --}}
-    <div class="article-detail-header">
-        <div class="article-detail-meta">
-            <span class="badge" style="background: rgba(96, 63, 38, 0.08); padding: 4px 12px; border-radius: 999px; color: var(--brown); font-weight: 600;">
-                {{ $article->category ?? 'Tips' }}
-            </span>
-            <span>{{ $article->published_at?->format('d F Y') }}</span>
-        </div>
-        <h1 class="article-detail-title">{{ $article->title }}</h1>
-    </div>
-
-    {{-- Thumbnail --}}
-    @if($article->thumbnail)
-        <img src="{{ Storage::url($article->thumbnail) }}" alt="{{ $article->title }}" class="article-detail-thumbnail">
-    @else
-        <div class="article-detail-thumbnail">🌿</div>
-    @endif
-
-    {{-- Content --}}
-    <div class="article-detail-body">
-        {!! $article->body !!}
-    </div>
-
-    {{-- Back Button --}}
-    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--peach);">
-        <a href="{{ route('skin-guide.index') }}" style="color: var(--dark-brown); font-weight: 600; text-decoration: underline; text-underline-offset: 4px;">
-            ← Kembali ke Skin Guide
+    {{-- Back nav ── --}}
+    <div class="ad-back">
+        <a href="{{ route('skin-guide.index') }}" class="ad-back-link">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5M12 5l-7 7 7 7"/>
+            </svg>
+            Kembali ke Skin Guide
         </a>
     </div>
+
+    {{-- Article ── --}}
+    <div class="ad-wrapper">
+
+        <div class="ad-header">
+            <div class="ad-meta">
+                <span class="ad-badge">{{ $article->category ?? 'Tips' }}</span>
+                <span class="ad-date">{{ $article->published_at?->format('d F Y') }}</span>
+            </div>
+            <h1 class="ad-title">{{ $article->title }}</h1>
+            @if($article->excerpt)
+                <p class="ad-excerpt">{{ $article->excerpt }}</p>
+            @endif
+        </div>
+
+        {{-- Thumbnail ── --}}
+        <div class="ad-thumb-wrap">
+            @if($article->thumbnail)
+                <img src="{{ Storage::url($article->thumbnail) }}" alt="{{ $article->title }}">
+            @else
+                🌿
+            @endif
+        </div>
+
+        {{-- Body ── --}}
+        <div class="ad-body">
+            {!! $article->body !!}
+        </div>
+
+        <hr class="ad-divider">
+    </div>
+
+    {{-- Recommended Articles ── --}}
+    @if(isset($recommended) && $recommended->count() > 0)
+    <div class="ad-recommended">
+        <div class="ad-rec-header">
+            <h2 class="ad-rec-title">Artikel Terkait</h2>
+        </div>
+
+        <div class="ad-rec-grid">
+            @foreach($recommended->take(3) as $rec)
+                <a href="{{ route('skin-guide.show', $rec->slug) }}" class="ad-rec-card">
+                    <div class="ad-rec-thumb">
+                        @if($rec->thumbnail)
+                            <img src="{{ Storage::url($rec->thumbnail) }}" alt="{{ $rec->title }}">
+                        @else
+                            🌿
+                        @endif
+                    </div>
+                    <div class="ad-rec-body">
+                        <div class="ad-rec-badge">{{ $rec->category ?? 'Tips' }}</div>
+                        <h3 class="ad-rec-card-title">{{ $rec->title }}</h3>
+                        <div class="ad-rec-date">{{ $rec->published_at?->format('d M Y') }}</div>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
 </div>
 @endsection
