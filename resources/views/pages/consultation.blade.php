@@ -44,7 +44,7 @@
     /* ── Form wrapper untuk layout landscape ── */
     #consult-form {
         width: 100%;
-        max-width: 900px;
+        max-width: 800px;
         margin: 0 auto;
         padding: 0 1.5rem;
         box-sizing: border-box;
@@ -176,7 +176,7 @@
         display: flex;
         justify-content: flex-end;
         align-items: center;
-        padding: 0 2.4rem 0.8rem;
+        padding: 0 2.2rem 0.8rem;
     }
     .submit-arrow-btn {
         width: 38px; height: 38px;
