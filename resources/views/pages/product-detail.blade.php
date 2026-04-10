@@ -1,164 +1,523 @@
 @extends('layouts.app')
 
-@section('title', $product->name . ' — SkinQuo')
+@section('title', ($product->name ?? 'Product') . ' — SkinQuo')
 
 @push('styles')
 <style>
-    .product-detail-wrapper {
-        max-width: 1100px;
-        margin: 6rem auto 4rem;
+    /* ══════════════════════════════════
+       PRODUCT DETAIL PAGE
+    ══════════════════════════════════ */
+    .pd-page {
+        background: #FFEAC5;
+        min-height: 100vh;
+        padding-top: 6.5rem;
+        padding-bottom: 6rem;
+    }
+
+    .pd-inner {
+        max-width: 1200px;
+        margin: 0 auto;
         padding: 0 2rem;
     }
 
-    .product-detail-grid {
+    /* ── Breadcrumb ── */
+    .pd-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.78rem;
+        color: rgba(96, 63, 38, 0.5);
+        margin-bottom: 2.25rem;
+        flex-wrap: wrap;
+    }
+    .pd-breadcrumb a {
+        color: rgba(96, 63, 38, 0.5);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .pd-breadcrumb a:hover { color: #603F26; }
+    .pd-breadcrumb-sep { opacity: 0.35; }
+    .pd-breadcrumb-current { color: #603F26; font-weight: 600; }
+
+    /* ── Main Grid ── */
+    .pd-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 3rem;
-        margin-bottom: 3rem;
+        gap: 4rem;
+        margin-bottom: 5rem;
+        align-items: start;
     }
 
-    @media (max-width: 768px) {
-        .product-detail-grid {
-            grid-template-columns: 1fr;
-        }
+    @media (max-width: 860px) {
+        .pd-grid { grid-template-columns: 1fr; gap: 2.5rem; }
     }
 
-    .product-detail-image {
-        height: 500px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #e8d5bb, #d4b896);
+    /* ── LEFT: Image Panel ── */
+    .pd-image-panel {
+        position: sticky;
+        top: 6.5rem;
+    }
+
+    .pd-main-image {
+        width: 100%;
+        aspect-ratio: 1;
+        background: linear-gradient(145deg, #f0e2cc, #e0c8a8);
+        border-radius: 24px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 5rem;
-        border: 2px solid var(--peach);
+        font-size: 6rem;
+        overflow: hidden;
+        border: 2px solid rgba(108, 78, 49, 0.1);
+        margin-bottom: 1rem;
+        position: relative;
     }
-
-    .product-detail-image img {
+    .pd-main-image img {
+        width: 100%;
         height: 100%;
         object-fit: contain;
+        padding: 2rem;
     }
 
-    .product-detail-info h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 2.5rem;
+    .pd-bestseller-ribbon {
+        position: absolute;
+        top: 1.25rem;
+        left: 1.25rem;
+        background: #603F26;
+        color: #FFEAC5;
+        font-size: 0.65rem;
         font-weight: 700;
-        color: var(--dark-brown);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+    }
+
+    /* ── RIGHT: Info Panel ── */
+    .pd-info-panel {}
+
+    .pd-cat-badge {
+        display: inline-block;
+        background: rgba(96, 63, 38, 0.08);
+        color: #6C4E31;
+        border-radius: 999px;
+        padding: 0.32rem 1rem;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
         margin-bottom: 1rem;
     }
 
-    .product-detail-price {
-        font-size: 2rem;
+    .pd-name {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(1.7rem, 3.5vw, 2.4rem);
         font-weight: 700;
-        color: var(--dark-brown);
-        margin-bottom: 1.5rem;
+        color: #603F26;
+        line-height: 1.2;
+        margin-bottom: 0.75rem;
     }
 
-    .product-detail-category {
-        display: inline-block;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        background: rgba(96, 63, 38, 0.08);
-        color: var(--brown);
-        padding: 6px 14px;
-        border-radius: 999px;
+    /* Stars row */
+    .pd-stars-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
         margin-bottom: 1.5rem;
     }
+    .pd-stars { color: #C4934A; font-size: 0.9rem; letter-spacing: 1px; }
+    .pd-rating-text { font-size: 0.8rem; color: rgba(96, 63, 38, 0.5); }
 
-    .product-detail-description {
-        color: var(--brown);
-        line-height: 1.8;
-        font-size: 1rem;
+    .pd-price {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #603F26;
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.03em;
+    }
+
+    .pd-short-desc {
+        font-size: 0.9rem;
+        color: rgba(96, 63, 38, 0.68);
+        line-height: 1.75;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1.5px solid rgba(108, 78, 49, 0.1);
+    }
+
+    /* ── Skin type tags ── */
+    .pd-skin-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
         margin-bottom: 2rem;
     }
-
-    .product-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
+    .pd-skin-tag {
+        background: #FFDBB5;
+        border: 1px solid rgba(108, 78, 49, 0.18);
+        border-radius: 999px;
+        padding: 0.32rem 0.9rem;
+        font-size: 0.73rem;
+        font-weight: 500;
+        color: #6C4E31;
     }
 
-    .btn {
-        padding: 0.9rem 2rem;
-        border-radius: 999px;
+    /* ── Action buttons ── */
+    .pd-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+        flex-wrap: wrap;
+    }
+
+    .pd-btn-primary {
+        flex: 1;
+        min-width: 160px;
+        background: #603F26;
+        color: #FFEAC5;
         border: none;
-        font-size: 0.95rem;
+        border-radius: 999px;
+        padding: 0.9rem 2rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.15s;
+    }
+    .pd-btn-primary:hover { opacity: 0.85; transform: translateY(-2px); }
+
+    .pd-btn-secondary {
+        background: #FFDBB5;
+        color: #603F26;
+        border: 1.5px solid rgba(108, 78, 49, 0.2);
+        border-radius: 999px;
+        padding: 0.9rem 1.5rem;
+        font-size: 0.9rem;
         font-weight: 600;
         font-family: 'Poppins', sans-serif;
         cursor: pointer;
         transition: all 0.2s;
     }
-
-    .btn-primary {
-        background: var(--dark-brown);
-        color: var(--cream);
+    .pd-btn-secondary:hover {
+        border-color: #603F26;
+        background: rgba(108, 78, 49, 0.08);
     }
 
-    .btn-primary:hover {
-        opacity: 0.85;
-        transform: translateY(-2px);
+    /* ── Tabs ── */
+    .pd-tabs {
+        margin-top: 2rem;
     }
 
-    .btn-secondary {
-        background: var(--peach);
-        color: var(--dark-brown);
+    .pd-tab-buttons {
+        display: flex;
+        gap: 0;
+        border-bottom: 1.5px solid rgba(108, 78, 49, 0.12);
+        margin-bottom: 1.75rem;
     }
 
-    .btn-secondary:hover {
-        opacity: 0.85;
+    .pd-tab-btn {
+        background: none;
+        border: none;
+        border-bottom: 2.5px solid transparent;
+        padding: 0.6rem 1.25rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        font-family: 'Poppins', sans-serif;
+        color: rgba(96, 63, 38, 0.45);
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: -1.5px;
+    }
+    .pd-tab-btn.active, .pd-tab-btn:hover {
+        color: #603F26;
+        border-bottom-color: #603F26;
+    }
+
+    .pd-tab-panel { display: none; }
+    .pd-tab-panel.active { display: block; }
+
+    .pd-tab-content {
+        font-size: 0.88rem;
+        color: rgba(96, 63, 38, 0.72);
+        line-height: 1.8;
+    }
+    .pd-tab-content p { margin-bottom: 1rem; }
+    .pd-tab-content ul { padding-left: 1.2rem; }
+    .pd-tab-content li { margin-bottom: 0.45rem; }
+    .pd-tab-content strong { color: #603F26; }
+
+    /* ── How to use steps ── */
+    .pd-steps {
+        list-style: none;
+        padding: 0;
+        counter-reset: step;
+    }
+    .pd-steps li {
+        counter-increment: step;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        font-size: 0.88rem;
+        color: rgba(96, 63, 38, 0.72);
+        line-height: 1.65;
+    }
+    .pd-steps li::before {
+        content: counter(step);
+        background: #603F26;
+        color: #FFEAC5;
+        width: 24px; height: 24px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 0.15rem;
+    }
+
+    /* ── Ingredients tags ── */
+    .pd-ingredients {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .pd-ingredient-tag {
+        background: rgba(96, 63, 38, 0.07);
+        border-radius: 8px;
+        padding: 0.35rem 0.85rem;
+        font-size: 0.78rem;
+        color: #6C4E31;
+        font-weight: 500;
+    }
+
+    /* ── Bottom section ── */
+    .pd-bottom-section {
+        padding-top: 3rem;
+        border-top: 1.5px solid rgba(108, 78, 49, 0.1);
+    }
+
+    .pd-section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #603F26;
+        margin-bottom: 2rem;
+    }
+
+    .pd-related-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) { .pd-related-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .pd-related-grid { grid-template-columns: 1fr; } }
+
+    .pd-related-card {
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        text-decoration: none;
+        border: 1.5px solid rgba(108, 78, 49, 0.08);
+        transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .pd-related-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(96, 63, 38, 0.13);
+    }
+
+    .pd-related-thumb {
+        height: 160px;
+        background: linear-gradient(135deg, #f0e2cc, #e0c8a8);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.5rem;
+        overflow: hidden;
+        position: relative;
+    }
+    .pd-related-thumb img {
+        width: 100%; height: 100%; object-fit: contain;
+        padding: 1rem;
+    }
+
+    .pd-related-body { padding: 1rem 1.1rem 1.25rem; }
+    .pd-related-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #603F26;
+        line-height: 1.4;
+        margin-bottom: 0.4rem;
+    }
+    .pd-related-price {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #603F26;
     }
 </style>
 @endpush
 
 @section('content')
-<div class="product-detail-wrapper">
+<div class="pd-page">
+<div class="pd-inner">
 
-    {{-- Grid: Image + Info --}}
-    <div class="product-detail-grid">
+    {{-- Breadcrumb ── --}}
+    <nav class="pd-breadcrumb">
+        <a href="{{ route('home') }}">Home</a>
+        <span class="pd-breadcrumb-sep">›</span>
+        <a href="{{ route('catalog.index') }}">Catalog</a>
+        <span class="pd-breadcrumb-sep">›</span>
+        <span class="pd-breadcrumb-current">{{ Str::limit($product->name, 40) }}</span>
+    </nav>
 
-        {{-- Image --}}
-        <div class="product-detail-image">
-            @if($product->image)
-                <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}">
-            @else
-                💧
-            @endif
+    {{-- Main Grid ── --}}
+    <div class="pd-grid">
+
+        {{-- LEFT: Images ── --}}
+        <div class="pd-image-panel">
+            <div class="pd-main-image">
+                @if($product->is_best_seller ?? false)
+                    <div class="pd-bestseller-ribbon">⭐ Best Seller</div>
+                @endif
+                @if($product->image)
+                    <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}">
+                @else
+                    💧
+                @endif
+            </div>
         </div>
 
-        {{-- Info --}}
-        <div class="product-detail-info">
-            <div class="product-detail-category">{{ $product->category ?? 'Product' }}</div>
+        {{-- RIGHT: Info ── --}}
+        <div class="pd-info-panel">
+            <div class="pd-cat-badge">{{ $product->category ?? 'Product' }}</div>
+            <h1 class="pd-name">{{ $product->name }}</h1>
 
-            <h1>{{ $product->name }}</h1>
-
-            <div class="product-detail-price">${{ number_format($product->price, 2) }}</div>
-
-            <div class="product-detail-description">
-                {!! $product->description ?? 'Product description coming soon.' !!}
+            {{-- Stars ── --}}
+            <div class="pd-stars-row">
+                @php $rating = $product->rating ?? 4.5; @endphp
+                <span class="pd-stars">
+                    @for ($i = 1; $i <= 5; $i++)
+                        {{ $i <= round($rating) ? '★' : '☆' }}
+                    @endfor
+                </span>
+                <span class="pd-rating-text">{{ number_format($rating, 1) }} ({{ $product->reviews_count ?? rand(20, 200) }} ulasan)</span>
             </div>
 
-            @if($product->is_best_seller)
-                <div style="background: rgba(96, 63, 38, 0.08); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; color: var(--dark-brown); font-weight: 600;">
-                    ⭐ Best Seller - Terbukti disukai oleh ribuan pelanggan
+            <div class="pd-price">${{ number_format($product->price, 2) }}</div>
+
+            <p class="pd-short-desc">
+                {{ Str::limit($product->description ?? 'Produk perawatan kulit premium yang diformulasikan untuk memberikan nutrisi terbaik bagi kulit Anda.', 200) }}
+            </p>
+
+            {{-- Skin type tags ── --}}
+            @if($product->skin_types ?? false)
+                <div class="pd-skin-tags">
+                    @foreach($product->skin_types as $type)
+                        <span class="pd-skin-tag">{{ $type }}</span>
+                    @endforeach
+                </div>
+            @else
+                <div class="pd-skin-tags">
+                    <span class="pd-skin-tag">Semua Jenis Kulit</span>
+                    <span class="pd-skin-tag">Sensitive-Friendly</span>
                 </div>
             @endif
 
-            <div class="product-actions">
-                <button class="btn btn-primary">Tambah ke Keranjang</button>
-                <button class="btn btn-secondary">Wishlist ♡</button>
+            {{-- Actions ── --}}
+            <div class="pd-actions">
+                <button class="pd-btn-primary">Tambah ke Keranjang</button>
+                <button class="pd-btn-secondary">♡ Wishlist</button>
             </div>
+
+            {{-- Tabs ── --}}
+            <div class="pd-tabs">
+                <div class="pd-tab-buttons">
+                    <button class="pd-tab-btn active" onclick="openTab(event, 'tab-desc')">Deskripsi</button>
+                    <button class="pd-tab-btn" onclick="openTab(event, 'tab-how')">Cara Pakai</button>
+                    <button class="pd-tab-btn" onclick="openTab(event, 'tab-ingredients')">Ingredients</button>
+                </div>
+
+                {{-- Description ── --}}
+                <div id="tab-desc" class="pd-tab-panel active">
+                    <div class="pd-tab-content">
+                        {!! $product->description ?? '<p>Produk perawatan kulit premium dari SkinQuo.</p>' !!}
+                    </div>
+                </div>
+
+                {{-- How to use ── --}}
+                <div id="tab-how" class="pd-tab-panel">
+                    <div class="pd-tab-content">
+                        @if($product->how_to_use ?? false)
+                            {!! $product->how_to_use !!}
+                        @else
+                            <ol class="pd-steps">
+                                <li>Bersihkan wajah menggunakan cleanser dan keringkan.</li>
+                                <li>Oleskan produk secara merata ke wajah dan leher.</li>
+                                <li>Tunggu hingga terserap sempurna (±1–2 menit).</li>
+                                <li>Lanjutkan dengan langkah skincare berikutnya.</li>
+                                <li>Gunakan pagi dan malam hari untuk hasil optimal.</li>
+                            </ol>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Ingredients ── --}}
+                <div id="tab-ingredients" class="pd-tab-panel">
+                    <div class="pd-tab-content">
+                        @if($product->ingredients ?? false)
+                            <div class="pd-ingredients">
+                                @foreach(explode(',', $product->ingredients) as $ingredient)
+                                    <span class="pd-ingredient-tag">{{ trim($ingredient) }}</span>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="pd-ingredients">
+                                @foreach(['Niacinamide', 'Hyaluronic Acid', 'Ceramide', 'Vitamin E', 'Centella Asiatica', 'Panthenol', 'Glycerin', 'Allantoin'] as $ing)
+                                    <span class="pd-ingredient-tag">{{ $ing }}</span>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
         </div>
-
     </div>
 
-    {{-- Back Button --}}
-    <div style="padding-top: 2rem; border-top: 1px solid var(--peach);">
-        <a href="{{ route('catalog.index') }}" style="color: var(--dark-brown); font-weight: 600; text-decoration: underline; text-underline-offset: 4px;">
-            ← Kembali ke Catalog
-        </a>
+    {{-- Related Products ── --}}
+    @if(isset($related) && $related->count() > 0)
+    <div class="pd-bottom-section">
+        <h2 class="pd-section-title">Produk Terkait</h2>
+        <div class="pd-related-grid">
+            @foreach($related->take(4) as $rel)
+                <a href="{{ route('catalog.show', $rel->slug) }}" class="pd-related-card">
+                    <div class="pd-related-thumb">
+                        @if($rel->image)
+                            <img src="{{ Storage::url($rel->image) }}" alt="{{ $rel->name }}">
+                        @else
+                            💧
+                        @endif
+                    </div>
+                    <div class="pd-related-body">
+                        <div class="pd-related-name">{{ $rel->name }}</div>
+                        <div class="pd-related-price">${{ number_format($rel->price, 2) }}</div>
+                    </div>
+                </a>
+            @endforeach
+        </div>
     </div>
+    @endif
 
 </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    function openTab(e, tabId) {
+        document.querySelectorAll('.pd-tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.pd-tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        e.currentTarget.classList.add('active');
+    }
+</script>
+@endpush
