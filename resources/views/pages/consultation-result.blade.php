@@ -1,316 +1,627 @@
 @extends('layouts.app')
 
-@section('title', 'Consultation Result — SkinQuo')
+@section('title', 'Hasil Konsultasi — SkinQuo')
 
 @push('styles')
 <style>
-    .result-container {
-        max-width: 1000px;
-        margin: 6rem auto 4rem;
-        padding: 0 1.5rem;
-    }
-
-    .result-hero {
-        text-align: center;
-        padding: 3rem 1.5rem;
+    /* ══════════════════════════════════
+       CONSULTATION RESULT PAGE
+    ══════════════════════════════════ */
+    .cr-page {
         background: #FFEAC5;
-        border-radius: 24px;
-        margin-bottom: 2rem;
+        min-height: 100vh;
+        padding-top: 6.5rem;
+        padding-bottom: 6rem;
     }
 
-    .result-hero h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #603F26;
-        margin-bottom: 0.5rem;
+    .cr-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 2rem;
     }
 
-    .result-hero p {
-        color: rgba(96, 63, 38, 0.7);
-        font-size: 1rem;
-    }
-
-    .consultation-id {
-        font-size: 0.8rem;
-        color: rgba(96, 63, 38, 0.5);
-        margin-top: 1rem;
-    }
-
-    .result-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    /* ── Hero Banner ── */
+    .cr-hero {
+        background: #603F26;
+        border-radius: 28px;
+        padding: 3rem 3.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .result-card {
-        background: white;
-        border: 1px solid rgba(96, 63, 38, 0.1);
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(96, 63, 38, 0.08);
-    }
-
-    .result-card h3 {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #603F26;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .result-card-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: rgba(96, 63, 38, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        flex-shrink: 0;
-    }
-
-    .trait-list {
-        list-style: none;
-        padding: 0;
-    }
-
-    .trait-list li {
-        padding: 0.75rem 0;
-        border-bottom: 1px solid rgba(96, 63, 38, 0.1);
-        color: #603F26;
-        font-size: 0.95rem;
-    }
-
-    .trait-list li:last-child {
-        border-bottom: none;
-    }
-
-    .trait-list li::before {
-        content: "→ ";
-        margin-right: 0.5rem;
-        color: #6C4E31;
-        font-weight: 700;
-    }
-
-    .pref-badge {
-        display: inline-block;
-        background: rgba(96, 63, 38, 0.1);
-        border: 1px solid rgba(96, 63, 38, 0.2);
-        border-radius: 999px;
-        padding: 0.4rem 1rem;
-        font-size: 0.8rem;
-        color: #603F26;
-        margin-right: 0.5rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
+        margin-bottom: 2.5rem;
         flex-wrap: wrap;
     }
 
-    .btn {
+    .cr-hero-left {}
+
+    .cr-hero-eyebrow {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255, 219, 181, 0.5);
+        margin-bottom: 0.6rem;
+    }
+
+    .cr-hero-title {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+        font-weight: 700;
+        color: #FFEAC5;
+        line-height: 1.25;
+        margin-bottom: 0.75rem;
+    }
+
+    .cr-hero-sub {
+        font-size: 0.88rem;
+        color: rgba(255, 234, 197, 0.6);
+        line-height: 1.7;
+        max-width: 400px;
+    }
+
+    .cr-hero-right {
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .cr-consult-id {
+        font-size: 0.7rem;
+        color: rgba(255, 234, 197, 0.4);
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.06em;
+    }
+
+    .cr-status-badge {
+        display: inline-block;
+        padding: 0.4rem 1.2rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+    }
+    .cr-status-pending {
+        background: rgba(255, 152, 0, 0.2);
+        color: #ffb74d;
+    }
+    .cr-status-processed {
+        background: rgba(76, 175, 80, 0.2);
+        color: #81c784;
+    }
+
+    /* ── Layout: 2 columns ── */
+    .cr-layout {
+        display: grid;
+        grid-template-columns: 1.05fr 1fr;
+        gap: 1.75rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 820px) { .cr-layout { grid-template-columns: 1fr; } }
+
+    /* ── Card base ── */
+    .cr-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 1.75rem 2rem;
+        border: 1.5px solid rgba(108, 78, 49, 0.08);
+    }
+
+    .cr-card-title {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #603F26;
+        margin-bottom: 1.5rem;
+    }
+
+    .cr-card-icon {
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        background: rgba(96, 63, 38, 0.09);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    /* ── Skin Score Gauge ── */
+    .cr-score-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .cr-gauge-wrap {
+        position: relative;
+        width: 160px;
+        height: 90px;
+        margin-bottom: 0.5rem;
+    }
+
+    .cr-gauge-svg {
+        width: 160px;
+        height: 90px;
+        overflow: visible;
+    }
+
+    .cr-gauge-label {
+        text-align: center;
+    }
+
+    .cr-gauge-number {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #603F26;
+        line-height: 1;
+    }
+
+    .cr-gauge-sublabel {
+        font-size: 0.72rem;
+        color: rgba(96, 63, 38, 0.45);
+        margin-top: 0.25rem;
+    }
+
+    /* ── Progress bars ── */
+    .cr-metrics {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .cr-metric-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .cr-metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .cr-metric-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6C4E31;
+    }
+
+    .cr-metric-value {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #603F26;
+    }
+
+    .cr-progress-track {
+        height: 7px;
+        background: rgba(96, 63, 38, 0.1);
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .cr-progress-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #6C4E31, #C4934A);
+        transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 0;
+    }
+
+    /* ── Trait list ── */
+    .cr-trait-list {
+        list-style: none;
+        padding: 0;
+    }
+    .cr-trait-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(96, 63, 38, 0.06);
+        font-size: 0.88rem;
+        color: #603F26;
+        line-height: 1.5;
+    }
+    .cr-trait-item:last-child { border-bottom: none; }
+    .cr-trait-bullet {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: #C4934A;
+        flex-shrink: 0;
+        margin-top: 0.4rem;
+    }
+
+    /* ── Preferences badges ── */
+    .cr-pref-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .cr-pref-tag {
+        background: rgba(96, 63, 38, 0.08);
+        border: 1px solid rgba(96, 63, 38, 0.14);
+        border-radius: 999px;
+        padding: 0.35rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6C4E31;
+    }
+
+    /* ── Skin Story ── */
+    .cr-story-text {
+        background: rgba(96, 63, 38, 0.04);
+        border-left: 3px solid #FFDBB5;
+        border-radius: 0 12px 12px 0;
+        padding: 1.25rem 1.5rem;
+        font-size: 0.9rem;
+        color: rgba(96, 63, 38, 0.75);
+        line-height: 1.8;
+        font-style: italic;
+    }
+
+    /* ── Recommended Products ── */
+    .cr-rec-section {
+        margin-top: 2rem;
+    }
+
+    .cr-rec-header {
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+        padding-top: 1rem;
+        border-top: 1.5px solid rgba(108, 78, 49, 0.1);
+    }
+
+    .cr-rec-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.65rem;
+        font-weight: 700;
+        color: #603F26;
+    }
+
+    .cr-rec-sub {
+        font-size: 0.8rem;
+        color: rgba(96, 63, 38, 0.45);
+    }
+
+    .cr-rec-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+    }
+    @media (max-width: 960px) { .cr-rec-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .cr-rec-grid { grid-template-columns: 1fr; } }
+
+    .cr-rec-card {
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        text-decoration: none;
+        border: 1.5px solid rgba(108, 78, 49, 0.08);
+        transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .cr-rec-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 28px rgba(96, 63, 38, 0.13);
+    }
+
+    .cr-rec-thumb {
+        height: 150px;
+        background: linear-gradient(135deg, #f0e2cc, #e0c8a8);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.5rem;
+        overflow: hidden; position: relative;
+    }
+    .cr-rec-thumb img {
+        width: 100%; height: 100%; object-fit: contain;
+        padding: 0.75rem;
+    }
+
+    .cr-rec-match-badge {
+        position: absolute;
+        top: 0.6rem; right: 0.6rem;
+        background: #603F26;
+        color: #FFEAC5;
+        font-size: 0.58rem;
+        font-weight: 700;
+        padding: 0.22rem 0.6rem;
+        border-radius: 999px;
+    }
+
+    .cr-rec-body { padding: 1rem 1.1rem 1.25rem; }
+    .cr-rec-cat {
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(96, 63, 38, 0.45);
+        margin-bottom: 0.35rem;
+    }
+    .cr-rec-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #603F26;
+        line-height: 1.35;
+        margin-bottom: 0.4rem;
+    }
+    .cr-rec-price {
+        font-size: 0.88rem;
+        font-weight: 800;
+        color: #603F26;
+    }
+
+    /* ── CTA Buttons ── */
+    .cr-cta-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .cr-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
         padding: 0.85rem 2rem;
         border: none;
         border-radius: 999px;
-        font-size: 0.95rem;
-        font-weight: 600;
+        font-size: 0.875rem;
+        font-weight: 700;
         font-family: 'Poppins', sans-serif;
         cursor: pointer;
         transition: all 0.2s;
         text-decoration: none;
-        display: inline-block;
     }
-
-    .btn-primary {
+    .cr-btn-primary {
         background: #603F26;
-        color: white;
+        color: #FFEAC5;
     }
+    .cr-btn-primary:hover { opacity: 0.85; transform: translateY(-2px); }
 
-    .btn-primary:hover {
-        opacity: 0.85;
-        transform: translateY(-2px);
-    }
-
-    .btn-secondary {
+    .cr-btn-secondary {
         background: transparent;
         color: #603F26;
-        border: 1.5px solid #603F26;
+        border: 1.5px solid rgba(96, 63, 38, 0.3);
+    }
+    .cr-btn-secondary:hover {
+        border-color: #603F26;
+        background: rgba(96, 63, 38, 0.04);
     }
 
-    .btn-secondary:hover {
-        background: rgba(96, 63, 38, 0.05);
-    }
-
-    .status-badge {
-        display: inline-block;
-        padding: 0.4rem 1.2rem;
-        border-radius: 999px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        margin-top: 1rem;
-    }
-
-    .status-pending {
-        background: rgba(255, 152, 0, 0.15);
-        color: #e65100;
-    }
-
-    .status-processed {
-        background: rgba(76, 175, 80, 0.15);
-        color: #1b5e20;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 3rem 1.5rem;
-        color: rgba(96, 63, 38, 0.5);
-    }
-
-    .empty-state-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-    }
-
-    @media (max-width: 768px) {
-        .result-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .result-hero h1 {
-            font-size: 1.75rem;
-        }
-
-        .action-buttons {
-            flex-direction: column;
-        }
-
-        .btn {
-            width: 100%;
-            text-align: center;
-        }
+    @media (max-width: 640px) {
+        .cr-hero { padding: 2rem 1.75rem; }
+        .cr-rec-grid { grid-template-columns: repeat(2, 1fr); }
+        .cr-cta-row { flex-direction: column; }
+        .cr-btn { width: 100%; justify-content: center; }
     }
 </style>
 @endpush
 
 @section('content')
+<div class="cr-page">
+<div class="cr-inner">
 
-<div class="result-container">
-
-    {{-- Hero Section --}}
-    <div class="result-hero">
-        <h1>✨ Analisis Kulit Anda Selesai</h1>
-        <p>Berdasarkan cerita kulit Anda, kami telah mengidentifikasi karakteristik utama dan preferensi perawatan.</p>
-        <div class="consultation-id">
-            Consultation ID: <strong>#{{ $consultation->id }}</strong>
-            <span class="status-badge" :class="$consultation->status === 'pending' ? 'status-pending' : 'status-processed'">
-                {{ ucfirst($consultation->status) }}
-            </span>
+    {{-- Hero ── --}}
+    <div class="cr-hero">
+        <div class="cr-hero-left">
+            <div class="cr-hero-eyebrow">STEP 3 OF 3 — COMPLETE</div>
+            <h1 class="cr-hero-title">✨ Analisis Kulit<br>Anda Selesai</h1>
+            <p class="cr-hero-sub">Berdasarkan cerita kulit Anda, kami telah mengidentifikasi karakteristik utama dan rekomendasi terbaik untuk rutinitas Anda.</p>
+        </div>
+        <div class="cr-hero-right">
+            <div class="cr-consult-id">Consultation ID</div>
+            <div style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:#FFDBB5;">#{{ $consultation->id ?? '—' }}</div>
+            <div style="margin-top: 0.75rem;">
+                <span class="cr-status-badge {{ ($consultation->status ?? 'pending') === 'processed' ? 'cr-status-processed' : 'cr-status-pending' }}">
+                    {{ ucfirst($consultation->status ?? 'pending') }}
+                </span>
+            </div>
         </div>
     </div>
 
-    {{-- Results Grid --}}
-    <div class="result-grid">
+    {{-- 2-col Layout ── --}}
+    <div class="cr-layout">
 
-        {{-- Detected Traits --}}
-        @if($consultation->detected_traits && count($consultation->detected_traits) > 0)
-        <div class="result-card">
-            <h3>
-                <div class="result-card-icon">🔬</div>
-                Detected Traits
-            </h3>
-            <ul class="trait-list">
-                @foreach($consultation->detected_traits as $trait)
-                    <li>{{ $trait }}</li>
-                @endforeach
-            </ul>
-        </div>
-        @endif
+        {{-- LEFT: Skin Score + Progress Bars ── --}}
+        <div class="cr-card">
+            <div class="cr-card-title">
+                <div class="cr-card-icon">📊</div>
+                Kondisi Kulit
+            </div>
 
-        {{-- Top Concerns --}}
-        @if($consultation->concern_1 || $consultation->concern_2)
-        <div class="result-card">
-            <h3>
-                <div class="result-card-icon">⚠️</div>
-                Top Concerns
-            </h3>
-            <ul class="trait-list">
-                @if($consultation->concern_1)
-                    <li>{{ str_replace('_', ' ', ucfirst($consultation->concern_1)) }}</li>
-                @endif
-                @if($consultation->concern_2)
-                    <li>{{ str_replace('_', ' ', ucfirst($consultation->concern_2)) }}</li>
-                @endif
-            </ul>
-        </div>
-        @endif
+            {{-- Gauge ── --}}
+            <div class="cr-score-section">
+                <div class="cr-gauge-wrap">
+                    <svg class="cr-gauge-svg" viewBox="0 0 160 90">
+                        {{-- Track arc ── --}}
+                        <path d="M 15 80 A 65 65 0 0 1 145 80"
+                              fill="none"
+                              stroke="rgba(96,63,38,0.1)"
+                              stroke-width="10"
+                              stroke-linecap="round"/>
+                        {{-- Fill arc ── (72% = good score) --}}
+                        <path id="gauge-fill"
+                              d="M 15 80 A 65 65 0 0 1 145 80"
+                              fill="none"
+                              stroke="url(#gaugeGrad)"
+                              stroke-width="10"
+                              stroke-linecap="round"
+                              stroke-dasharray="204"
+                              stroke-dashoffset="57"
+                              style="transition: stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1)"/>
+                        <defs>
+                            <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stop-color="#6C4E31"/>
+                                <stop offset="100%" stop-color="#C4934A"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="cr-gauge-label">
+                    <div class="cr-gauge-number" id="gauge-number">72</div>
+                    <div class="cr-gauge-sublabel">Skin Health Score</div>
+                </div>
+            </div>
 
-        {{-- Preferences --}}
-        @if($consultation->preferences && count($consultation->preferences) > 0)
-        <div class="result-card">
-            <h3>
-                <div class="result-card-icon">✓</div>
-                Your Preferences
-            </h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                @foreach($consultation->preferences as $pref)
-                    <span class="pref-badge">
-                        {{ str_replace('_', ' ', ucfirst($pref)) }}
-                    </span>
+            {{-- Metric bars ── --}}
+            <div class="cr-metrics">
+                @php
+                    $metrics = [
+                        'Hidrasi'       => 68,
+                        'Elastisitas'   => 74,
+                        'Kecerahan'     => 55,
+                        'Keseimbangan' => 82,
+                    ];
+                @endphp
+                @foreach($metrics as $label => $val)
+                    <div class="cr-metric-row">
+                        <div class="cr-metric-header">
+                            <span class="cr-metric-label">{{ $label }}</span>
+                            <span class="cr-metric-value">{{ $val }}%</span>
+                        </div>
+                        <div class="cr-progress-track">
+                            <div class="cr-progress-fill" data-width="{{ $val }}"></div>
+                        </div>
+                    </div>
                 @endforeach
             </div>
         </div>
-        @endif
 
+        {{-- RIGHT: Traits, Concerns, Preferences ── --}}
+        <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+            {{-- Detected Traits ── --}}
+            @if(($consultation->detected_traits ?? null) && count($consultation->detected_traits) > 0)
+            <div class="cr-card">
+                <div class="cr-card-title">
+                    <div class="cr-card-icon">🔬</div>
+                    Detected Traits
+                </div>
+                <ul class="cr-trait-list">
+                    @foreach($consultation->detected_traits as $trait)
+                        <li class="cr-trait-item">
+                            <div class="cr-trait-bullet"></div>
+                            <span>{{ $trait }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            {{-- Concerns ── --}}
+            @if(($consultation->concern_1 ?? null) || ($consultation->concern_2 ?? null))
+            <div class="cr-card">
+                <div class="cr-card-title">
+                    <div class="cr-card-icon">⚠️</div>
+                    Top Concerns
+                </div>
+                <ul class="cr-trait-list">
+                    @if($consultation->concern_1)
+                        <li class="cr-trait-item">
+                            <div class="cr-trait-bullet"></div>
+                            {{ str_replace('_', ' ', ucfirst($consultation->concern_1)) }}
+                        </li>
+                    @endif
+                    @if($consultation->concern_2)
+                        <li class="cr-trait-item">
+                            <div class="cr-trait-bullet"></div>
+                            {{ str_replace('_', ' ', ucfirst($consultation->concern_2)) }}
+                        </li>
+                    @endif
+                </ul>
+            </div>
+            @endif
+
+            {{-- Preferences ── --}}
+            @if(($consultation->preferences ?? null) && count($consultation->preferences) > 0)
+            <div class="cr-card">
+                <div class="cr-card-title">
+                    <div class="cr-card-icon">✓</div>
+                    Your Preferences
+                </div>
+                <div class="cr-pref-tags">
+                    @foreach($consultation->preferences as $pref)
+                        <span class="cr-pref-tag">{{ str_replace('_', ' ', ucfirst($pref)) }}</span>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+        </div>
     </div>
 
-    {{-- Skin Story --}}
-    <div class="result-card">
-        <h3>
-            <div class="result-card-icon">📝</div>
+    {{-- Skin Story ── --}}
+    <div class="cr-card" style="margin-bottom: 1.75rem;">
+        <div class="cr-card-title">
+            <div class="cr-card-icon">📝</div>
             Your Skin Story
-        </h3>
-        <p style="color: #603F26; line-height: 1.7; margin: 0;">
-            {{ $consultation->skin_story }}
-        </p>
+        </div>
+        <div class="cr-story-text">
+            "{{ $consultation->skin_story ?? '—' }}"
+        </div>
     </div>
 
-    {{-- Manual Tags --}}
-    @if($consultation->tags && count($consultation->tags) > 0)
-    <div class="result-card" style="margin-top: 2rem;">
-        <h3>
-            <div class="result-card-icon">🏷️</div>
-            Your Tags
-        </h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-            @foreach($consultation->tags as $tag)
-                <span class="pref-badge">{{ $tag }}</span>
+    {{-- Recommended Products ── --}}
+    @if(isset($recommendedProducts) && $recommendedProducts->count() > 0)
+    <div class="cr-rec-section">
+        <div class="cr-rec-header">
+            <h2 class="cr-rec-title">Produk Rekomendasi</h2>
+            <span class="cr-rec-sub">Disesuaikan dengan kondisi kulit Anda</span>
+        </div>
+
+        <div class="cr-rec-grid">
+            @foreach($recommendedProducts->take(4) as $i => $prod)
+                <a href="{{ route('catalog.show', $prod->slug) }}" class="cr-rec-card">
+                    <div class="cr-rec-thumb">
+                        @if($prod->image)
+                            <img src="{{ Storage::url($prod->image) }}" alt="{{ $prod->name }}">
+                        @else
+                            💧
+                        @endif
+                        <div class="cr-rec-match-badge">{{ 95 - $i * 5 }}% match</div>
+                    </div>
+                    <div class="cr-rec-body">
+                        <div class="cr-rec-cat">{{ $prod->category ?? 'Product' }}</div>
+                        <div class="cr-rec-name">{{ $prod->name }}</div>
+                        <div class="cr-rec-price">${{ number_format($prod->price, 2) }}</div>
+                    </div>
+                </a>
             @endforeach
         </div>
     </div>
     @endif
 
-    {{-- Action Buttons --}}
-    <div class="action-buttons">
-        <a href="{{ route('catalog.index') }}" class="btn btn-primary">
-            Explore Products →
+    {{-- CTA Buttons ── --}}
+    <div class="cr-cta-row">
+        <a href="{{ route('catalog.index') }}" class="cr-btn cr-btn-primary">
+            Explore Products
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
         </a>
-        <a href="{{ route('skin-guide.index') }}" class="btn btn-secondary">
-            Read Skin Guide
-        </a>
-        <a href="{{ route('consultation.index') }}" class="btn btn-secondary">
-            New Consultation
-        </a>
+        <a href="{{ route('skin-guide.index') }}" class="cr-btn cr-btn-secondary">Read Skin Guide</a>
+        <a href="{{ route('consultation.index') }}" class="cr-btn cr-btn-secondary">New Consultation</a>
     </div>
 
 </div>
-
+</div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Animate progress bars
+    document.querySelectorAll('.cr-progress-fill').forEach(function(bar) {
+        const w = bar.getAttribute('data-width');
+        setTimeout(() => { bar.style.width = w + '%'; }, 300);
+    });
+});
+</script>
+@endpush
