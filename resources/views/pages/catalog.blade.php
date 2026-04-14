@@ -61,6 +61,8 @@
         grid-template-columns: 240px 1fr;
         gap: 2.5rem;
         align-items: start;
+        width: 100%;
+        min-width: 0;
     }
 
     @media (max-width: 860px) {
@@ -229,10 +231,16 @@
         grid-template-columns: repeat(3, 1fr);
         gap: 1.5rem;
         margin-bottom: 3rem;
+        min-width: 0;
     }
 
     @media (max-width: 1100px) { .cat-products-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 560px) { .cat-products-grid { grid-template-columns: 1fr; } }
+
+    .cat-products-grid > a {
+        display: flex;
+        min-width: 0;
+    }
 
     .cat-product-card {
         background: #fff;
@@ -244,9 +252,10 @@
         display: flex;
         flex-direction: column;
         position: relative;
+        width: 100%;
     }
     .cat-product-card:hover {
-        transform: translateY(-6px) scale(1.01);
+        transform: translateY(-6px);
         box-shadow: 0 18px 44px rgba(96, 63, 38, 0.16);
     }
 
@@ -313,6 +322,8 @@
         line-height: 1.4;
         margin-bottom: 0.5rem;
         flex: 1;
+        word-break: break-word;
+        overflow-wrap: break-word;
     }
 
     /* Stars */
@@ -379,7 +390,7 @@
     <div class="cat-header">
         <div class="cat-header-top">
             <h1 class="cat-title">Our Catalog</h1>
-            <span class="cat-count">{{ ($products ?? collect())->total() ?? 0 }} produk</span>
+            <span class="cat-count">{{ is_array($products ?? null) ? count($products) : ($products->total() ?? 0) }} produk</span>
         </div>
         <p class="cat-sub">Pilih produk skincare terbaik untuk kebutuhan kulit Anda dari koleksi kami yang lengkap.</p>
     </div>
@@ -457,43 +468,45 @@
 
             <div class="cat-products-grid">
                 @forelse($products ?? [] as $product)
-                    <a href="{{ route('catalog.show', $product->slug) }}" class="cat-product-card">
+                    <a href="{{ route('products.show', $product['slug'] ?? Str::slug($product['name'] ?? 'product')) }}" style="text-decoration: none; color: inherit;">
+                        <div class="cat-product-card">
 
-                        @if($product->is_best_seller ?? false)
-                            <div class="cat-bestseller-badge">⭐ Best Seller</div>
-                        @endif
-
-                        <div class="cat-product-thumb">
-                            @if($product->image)
-                                <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}">
-                            @else
-                                💧
+                            @if($product['is_bestseller'] ?? false)
+                                <div class="cat-bestseller-badge">⭐ Best Seller</div>
                             @endif
-                        </div>
 
-                        <div class="cat-product-body">
-                            <div class="cat-product-cat">{{ $product->category ?? 'Product' }}</div>
-                            <h3 class="cat-product-name">{{ $product->name }}</h3>
-
-                            {{-- Stars ── --}}
-                            <div class="cat-stars">
-                                @php $rating = $product->rating ?? 4.5; @endphp
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <span class="cat-star {{ $i <= floor($rating) ? '' : ($i - $rating < 1 ? '' : 'cat-star-empty') }}">★</span>
-                                @endfor
-                                <span class="cat-reviews">({{ $product->reviews_count ?? rand(10, 120) }})</span>
+                            <div class="cat-product-thumb">
+                                @if(isset($product['image']) && $product['image'])
+                                    <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}">
+                                @else
+                                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 2.5rem;">💧</div>
+                                @endif
                             </div>
 
-                            <div class="cat-product-footer">
-                                <div class="cat-product-price">${{ number_format($product->price, 2) }}</div>
-                                <button class="cat-add-btn" onclick="event.preventDefault(); event.stopPropagation();" title="Tambah ke keranjang">
-                                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
+                            <div class="cat-product-body">
+                                <div class="cat-product-cat">{{ $product['category'] ?? 'Product' }}</div>
+                                <h3 class="cat-product-name">{{ $product['name'] }}</h3>
 
+                                {{-- Stars ── --}}
+                                <div class="cat-stars">
+                                    @php $rating = $product['rating'] ?? 4.5; @endphp
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <span class="cat-star {{ $i <= floor($rating) ? '' : ($i - $rating < 1 ? '' : 'cat-star-empty') }}">★</span>
+                                    @endfor
+                                    <span class="cat-reviews">({{ $product['reviews'] ?? rand(10, 120) }})</span>
+                                </div>
+
+                                <div class="cat-product-footer">
+                                    <div class="cat-product-price">Rp {{ number_format($product['price'] ?? 0, 0, ',', '.') }}</div>
+                                    <button class="cat-add-btn" onclick="event.preventDefault(); event.stopPropagation();" title="Tambah ke keranjang">
+                                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
                     </a>
                 @empty
                     <div class="cat-empty">
@@ -504,7 +517,7 @@
             </div>
 
             {{-- Pagination ── --}}
-            @if(($products ?? null) && $products->hasPages())
+            @if(!is_array($products ?? null) && $products && $products->hasPages())
                 <div style="display:flex; justify-content:center; margin-top:2rem;">
                     {{ $products->appends(request()->query())->links() }}
                 </div>

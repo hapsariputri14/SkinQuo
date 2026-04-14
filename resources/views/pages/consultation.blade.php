@@ -61,7 +61,9 @@
         margin: 0;
     }
     .consult-box:focus-within {
-        box-shadow: 0 0 0 3px rgba(108, 78, 49, 0.18);
+        box-shadow: 0 0 0 3px rgba(108, 78, 49, 0.25);
+        border-color: #603F26;
+        transform: translateY(-2px);
     }
 
     .consult-textarea {
@@ -69,17 +71,19 @@
         background: transparent;
         border: none;
         outline: none;
-        resize: none;
-        padding: 1.6rem 2.2rem 1.2rem;
+        resize: vertical;
+        padding: 1.8rem 2.2rem 1.2rem;
         font-family: 'Poppins', sans-serif;
-        font-size: 0.88rem;
+        font-size: 1rem;
         color: #603F26;
-        line-height: 1.6;
-        min-height: 100px;
+        line-height: 1.7;
+        min-height: 120px;
         box-sizing: border-box;
+        font-weight: 500;
     }
     .consult-textarea::placeholder { 
-        color: rgba(96, 63, 38, 0.38); 
+        color: rgba(96, 63, 38, 0.45); 
+        font-weight: 400;
     }
     .consult-textarea:disabled {
         opacity: 0.6;

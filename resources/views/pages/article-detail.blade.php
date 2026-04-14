@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', ($article->title ?? 'Article') . ' — SkinQuo')
+@section('title', (is_array($article) ? $article['title'] : $article->title ?? 'Article') . ' — SkinQuo')
 
 @push('styles')
 <style>
@@ -296,53 +296,85 @@
 
         <div class="ad-header">
             <div class="ad-meta">
-                <span class="ad-badge">{{ $article->category ?? 'Tips' }}</span>
-                <span class="ad-date">{{ $article->published_at?->format('d F Y') }}</span>
+                <span class="ad-badge">{{ is_array($article) ? $article['category'] : ($article->category ?? 'Tips') }}</span>
+                <span class="ad-date">
+                    @if(is_array($article))
+                        {{ $article['date'] ?? 'Terbaru' }}
+                    @else
+                        {{ $article->published_at?->format('d F Y') }}
+                    @endif
+                </span>
             </div>
-            <h1 class="ad-title">{{ $article->title }}</h1>
-            @if($article->excerpt)
-                <p class="ad-excerpt">{{ $article->excerpt }}</p>
+            <h1 class="ad-title">{{ is_array($article) ? $article['title'] : $article->title }}</h1>
+            @if(is_array($article) ? ($article['excerpt'] ?? null) : $article->excerpt)
+                <p class="ad-excerpt">{{ is_array($article) ? $article['excerpt'] : $article->excerpt }}</p>
             @endif
         </div>
 
         {{-- Thumbnail ── --}}
         <div class="ad-thumb-wrap">
-            @if($article->thumbnail)
-                <img src="{{ Storage::url($article->thumbnail) }}" alt="{{ $article->title }}">
+            @if(is_array($article))
+                @if(isset($article['thumbnail']) && $article['thumbnail'])
+                    <img src="{{ $article['thumbnail'] }}" alt="{{ $article['title'] }}">
+                @else
+                    🌿
+                @endif
             @else
-                🌿
+                @if($article->thumbnail)
+                    <img src="{{ Storage::url($article->thumbnail) }}" alt="{{ $article->title }}">
+                @else
+                    🌿
+                @endif
             @endif
         </div>
 
         {{-- Body ── --}}
         <div class="ad-body">
-            {!! $article->body !!}
+            @if(is_array($article))
+                {!! nl2br(htmlspecialchars($article['content'] ?? '')) !!}
+            @else
+                {!! $article->body !!}
+            @endif
         </div>
 
         <hr class="ad-divider">
     </div>
 
     {{-- Recommended Articles ── --}}
-    @if(isset($recommended) && $recommended->count() > 0)
+    @if(isset($recommended) && is_array($recommended) ? count($recommended) > 0 : $recommended->count() > 0)
     <div class="ad-recommended">
         <div class="ad-rec-header">
             <h2 class="ad-rec-title">Artikel Terkait</h2>
         </div>
 
         <div class="ad-rec-grid">
-            @foreach($recommended->take(3) as $rec)
-                <a href="{{ route('skin-guide.show', $rec->slug) }}" class="ad-rec-card">
+            @php
+                $recs = is_array($recommended) ? array_slice($recommended, 0, 3) : $recommended->take(3);
+            @endphp
+            @foreach($recs as $rec)
+                @php
+                    $recSlug = is_array($rec) ? $rec['slug'] : $rec->slug;
+                    $recThumb = is_array($rec) ? $rec['thumbnail'] : $rec->thumbnail;
+                    $recTitle = is_array($rec) ? $rec['title'] : $rec->title;
+                    $recCategory = is_array($rec) ? $rec['category'] : $rec->category;
+                    $recDate = is_array($rec) ? $rec['date'] : $rec->published_at?->format('d M Y');
+                @endphp
+                <a href="{{ route('articles.show', $recSlug) }}" class="ad-rec-card">
                     <div class="ad-rec-thumb">
-                        @if($rec->thumbnail)
-                            <img src="{{ Storage::url($rec->thumbnail) }}" alt="{{ $rec->title }}">
+                        @if($recThumb)
+                            @if(is_array($rec))
+                                <img src="{{ $recThumb }}" alt="{{ $recTitle }}">
+                            @else
+                                <img src="{{ Storage::url($recThumb) }}" alt="{{ $recTitle }}">
+                            @endif
                         @else
                             🌿
                         @endif
                     </div>
                     <div class="ad-rec-body">
-                        <div class="ad-rec-badge">{{ $rec->category ?? 'Tips' }}</div>
-                        <h3 class="ad-rec-card-title">{{ $rec->title }}</h3>
-                        <div class="ad-rec-date">{{ $rec->published_at?->format('d M Y') }}</div>
+                        <div class="ad-rec-badge">{{ $recCategory ?? 'Tips' }}</div>
+                        <h3 class="ad-rec-card-title">{{ $recTitle }}</h3>
+                        <div class="ad-rec-date">{{ $recDate }}</div>
                     </div>
                 </a>
             @endforeach

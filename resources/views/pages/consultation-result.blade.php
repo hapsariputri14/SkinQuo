@@ -417,10 +417,13 @@
         </div>
         <div class="cr-hero-right">
             <div class="cr-consult-id">Consultation ID</div>
-            <div style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:#FFDBB5;">#{{ $consultation->id ?? '—' }}</div>
+            <div style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:#FFDBB5;">#{{ is_array($consultation) ? ($consultation['id'] ?? '—') : ($consultation->id ?? '—') }}</div>
             <div style="margin-top: 0.75rem;">
-                <span class="cr-status-badge {{ ($consultation->status ?? 'pending') === 'processed' ? 'cr-status-processed' : 'cr-status-pending' }}">
-                    {{ ucfirst($consultation->status ?? 'pending') }}
+                @php
+                    $status = is_array($consultation) ? ($consultation['status'] ?? 'pending') : ($consultation->status ?? 'pending');
+                @endphp
+                <span class="cr-status-badge {{ $status === 'completed' ? 'cr-status-processed' : 'cr-status-pending' }}">
+                    {{ ucfirst($status) }}
                 </span>
             </div>
         </div>
@@ -498,14 +501,17 @@
         <div style="display:flex; flex-direction:column; gap:1.5rem;">
 
             {{-- Detected Traits ── --}}
-            @if(($consultation->detected_traits ?? null) && count($consultation->detected_traits) > 0)
+            @php
+                $traits = is_array($consultation) ? ($consultation['detected_traits'] ?? null) : ($consultation->detected_traits ?? null);
+            @endphp
+            @if($traits && count($traits) > 0)
             <div class="cr-card">
                 <div class="cr-card-title">
                     <div class="cr-card-icon">🔬</div>
                     Detected Traits
                 </div>
                 <ul class="cr-trait-list">
-                    @foreach($consultation->detected_traits as $trait)
+                    @foreach($traits as $trait)
                         <li class="cr-trait-item">
                             <div class="cr-trait-bullet"></div>
                             <span>{{ $trait }}</span>
@@ -516,23 +522,27 @@
             @endif
 
             {{-- Concerns ── --}}
-            @if(($consultation->concern_1 ?? null) || ($consultation->concern_2 ?? null))
+            @php
+                $concern_1 = is_array($consultation) ? ($consultation['concern_1'] ?? null) : ($consultation->concern_1 ?? null);
+                $concern_2 = is_array($consultation) ? ($consultation['concern_2'] ?? null) : ($consultation->concern_2 ?? null);
+            @endphp
+            @if($concern_1 || $concern_2)
             <div class="cr-card">
                 <div class="cr-card-title">
                     <div class="cr-card-icon">⚠️</div>
                     Top Concerns
                 </div>
                 <ul class="cr-trait-list">
-                    @if($consultation->concern_1)
+                    @if($concern_1)
                         <li class="cr-trait-item">
                             <div class="cr-trait-bullet"></div>
-                            {{ str_replace('_', ' ', ucfirst($consultation->concern_1)) }}
+                            {{ str_replace('_', ' ', ucfirst($concern_1)) }}
                         </li>
                     @endif
-                    @if($consultation->concern_2)
+                    @if($concern_2)
                         <li class="cr-trait-item">
                             <div class="cr-trait-bullet"></div>
-                            {{ str_replace('_', ' ', ucfirst($consultation->concern_2)) }}
+                            {{ str_replace('_', ' ', ucfirst($concern_2)) }}
                         </li>
                     @endif
                 </ul>
@@ -540,14 +550,17 @@
             @endif
 
             {{-- Preferences ── --}}
-            @if(($consultation->preferences ?? null) && count($consultation->preferences) > 0)
+            @php
+                $preferences = is_array($consultation) ? ($consultation['preferences'] ?? null) : ($consultation->preferences ?? null);
+            @endphp
+            @if($preferences && count($preferences) > 0)
             <div class="cr-card">
                 <div class="cr-card-title">
                     <div class="cr-card-icon">✓</div>
                     Your Preferences
                 </div>
                 <div class="cr-pref-tags">
-                    @foreach($consultation->preferences as $pref)
+                    @foreach($preferences as $pref)
                         <span class="cr-pref-tag">{{ str_replace('_', ' ', ucfirst($pref)) }}</span>
                     @endforeach
                 </div>
@@ -564,7 +577,10 @@
             Your Skin Story
         </div>
         <div class="cr-story-text">
-            "{{ $consultation->skin_story ?? '—' }}"
+            @php
+                $skin_story = is_array($consultation) ? ($consultation['skin_story'] ?? '—') : ($consultation->skin_story ?? '—');
+            @endphp
+            "{{ $skin_story }}"
         </div>
     </div>
 

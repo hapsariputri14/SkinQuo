@@ -381,52 +381,56 @@
     </div>
 
     {{-- Featured Article (first item) ── --}}
-    @php $featured = ($articles ?? collect())->first(); @endphp
+    @php $featured = $articles[0] ?? null; @endphp
     @if($featured)
-    <a href="{{ route('skin-guide.show', $featured->slug) }}" class="sg-featured">
-        <div class="sg-featured-img">
-            @if($featured->thumbnail)
-                <img src="{{ Storage::url($featured->thumbnail) }}" alt="{{ $featured->title }}">
-            @else
-                🌿
-            @endif
-        </div>
-        <div class="sg-featured-body">
-            <div class="sg-badge">{{ $featured->category ?? 'Featured' }}</div>
-            <h2 class="sg-featured-title">{{ $featured->title }}</h2>
-            <p class="sg-featured-excerpt">{{ Str::limit($featured->excerpt, 140) }}</p>
-            <span class="sg-read-link">
-                Read More
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-            </span>
-            <div class="sg-featured-date">{{ $featured->published_at?->format('d F Y') }}</div>
-        </div>
-    </a>
+        <a href="{{ route('articles.show', $featured['slug'] ?? 'featured') }}" style="text-decoration: none; color: inherit;">
+            <div class="sg-featured">
+                <div class="sg-featured-img">
+                    @if(isset($featured['thumbnail']) && $featured['thumbnail'])
+                        <img src="{{ $featured['thumbnail'] }}" alt="{{ $featured['title'] }}">
+                    @else
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 3rem;">🌿</div>
+                    @endif
+                </div>
+                <div class="sg-featured-body">
+                    <div class="sg-badge">{{ $featured['category'] ?? 'Featured' }}</div>
+                    <h2 class="sg-featured-title">{{ $featured['title'] }}</h2>
+                    <p class="sg-featured-excerpt">{{ Str::limit($featured['excerpt'], 140) }}</p>
+                    <span class="sg-read-link">
+                        Read More
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </span>
+                    <div class="sg-featured-date">{{ $featured['date'] ?? 'Terbaru' }}</div>
+                </div>
+            </div>
+        </a>
     @endif
 
     {{-- Articles Grid ── --}}
     <div class="sg-grid" id="sg-grid">
-        @forelse(($articles ?? collect())->skip(1) as $article)
-            <a href="{{ route('skin-guide.show', $article->slug) }}" class="sg-card">
-                <div class="sg-card-thumb">
-                    @if($article->thumbnail)
-                        <img src="{{ Storage::url($article->thumbnail) }}" alt="{{ $article->title }}">
-                    @else
-                        🌿
-                    @endif
-                </div>
-                <div class="sg-card-body">
-                    <div class="sg-card-badge">{{ $article->category ?? 'Tips' }}</div>
-                    <h3 class="sg-card-title">{{ $article->title }}</h3>
-                    <p class="sg-card-excerpt">{{ Str::limit($article->excerpt, 90) }}</p>
-                    <div class="sg-card-footer">
-                        <span class="sg-card-date">{{ $article->published_at?->format('d M Y') }}</span>
-                        <div class="sg-card-arrow">
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/>
-                            </svg>
+        @forelse(array_slice($articles ?? [], 1) as $article)
+            <a href="{{ route('articles.show', $article['slug'] ?? 'article') }}" style="text-decoration: none; color: inherit;">
+                <div class="sg-card">
+                    <div class="sg-card-thumb">
+                        @if(isset($article['thumbnail']) && $article['thumbnail'])
+                            <img src="{{ $article['thumbnail'] }}" alt="{{ $article['title'] }}">
+                        @else
+                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 2.5rem;">🌿</div>
+                        @endif
+                    </div>
+                    <div class="sg-card-body">
+                        <div class="sg-card-badge">{{ $article['category'] ?? 'Tips' }}</div>
+                        <h3 class="sg-card-title">{{ $article['title'] }}</h3>
+                        <p class="sg-card-excerpt">{{ Str::limit($article['excerpt'], 90) }}</p>
+                        <div class="sg-card-footer">
+                            <span class="sg-card-date">{{ $article['date'] ?? 'Terbaru' }}</span>
+                            <div class="sg-card-arrow">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -440,7 +444,7 @@
     </div>
 
     {{-- Pagination ── --}}
-    @if(($articles ?? null) && $articles->hasPages())
+    @if(!is_array($articles ?? null) && $articles && $articles->hasPages())
         <div class="sg-pagination">
             {{ $articles->appends(request()->query())->links() }}
         </div>
